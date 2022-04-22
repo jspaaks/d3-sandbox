@@ -1,0 +1,122 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+    </head>
+    <body>
+
+        <div id="target1"></div> <!-- these id names are just arbitrary, 'app' and 'chart' are common -->
+        <div id="target2"></div>
+        <div id="target3"></div>
+        <div id="target4"></div>
+        
+        <script type="text/javascript">
+
+            // ======================   target 1   ======================
+
+            // select the DOM element with id 'target1' using via CSS selectors. I'll use the id, but you can
+            // use 'class' as well as other things like first child and nth-child(odd) and whathaveyou
+            const target1 = d3.select("#target1");
+
+            // you can now manipulate the DOM via d3, check in the browser (Press F12 for developer tools)
+            // for example, append a div inside target1
+            target1.append("div")
+
+            // append another div to the HTMLElement identified by target1, then use the "fluent"
+            // pattern (chaining methods together) to set an attribute on the div
+            target1.append("div").attr("name", "michael")
+
+            // ======================   target 2   ======================
+
+            // now the difficult part, entering selections and appending DOM elements for each element of the
+            // array. Let's say we have some data:
+            const names = [
+                {"name": "a"},
+                {"name": "b"},
+                {"name": "c"},
+                {"name": "d"}
+            ]
+
+            d3.select("#target2")
+                .selectAll("div")  // select any divs inside target2 (even though we don't have any at the moment, weird right, but that's how it works)
+                .data(names)       // add all data (to target2)
+                .enter()           // enter the selection, we're inside #target2 afterwards,
+                .append("div")     // because that's the level where we want to append our new divs
+                .attr("name", (elem) => { return elem.name }) // set the name attribute again, but instead of data[i] or 
+                                                              // something, write a function that expects just one 
+                                                              // element out of the array 'names'. On the subject of
+                                                              // functions: people sometimes use the equivalent shorthand notation "elem => elem.name",
+                                                              // so without the return, parentheses, or braces.
+
+            // ======================   target 3   ======================
+
+            // so far we've manipulated regular HTMLElements, but you can also use d3 to add and
+            // manipulate SVG elements like 'rect', 'circle', 'line' etc, and set SVG attributes
+            // (which go by slightly different names than their HTML counterparts ...don't ask --it's WebDev!)
+
+            circleData = [
+                {"cx": 50, "cy": 10, "r": 10, "fill": "#ff0080"},
+                {"cx": 50, "cy": 110, "r": 30, "fill": "#0080ff"}
+            ]
+
+            const circleElems = d3.select("#target3").append("svg").selectAll("circle").data(circleData).enter().append("circle")
+
+            // at this point we have the DOM with the SVG element and 2 circle
+            // elements (use DevTools to check), now we need to set some
+            // properties to make them visible. BTW SVG circle elements have properties
+            // cx: the location in x for the center of the object
+            // cy: the location in y for the center of the object
+            // r: radius
+            
+            circleElems
+                .attr("cx", circle => circle.cx)
+                .attr("cy", circle => circle.cy)
+                .attr("r", circle => circle.r)
+                .style("fill", circle => circle.fill)
+
+            // Hope this will help you get started!
+
+            // ======================   target 4   ======================
+
+            const chart = d3.select("#target4")
+                            .append("svg")
+                            .attr("width", 700)
+                            .attr("height", 200)
+                            .append("g")
+                            .attr("transform", "translate(100, 50)")
+
+            const hscaler = d3.scaleLinear().domain([0, 70]).range([0, 500]);
+            const vscaler = d3.scaleLinear().domain([190, -10]).range([0, 100]);
+            const haxis = d3.axisBottom(hscaler)
+            const vaxis = d3.axisLeft(vscaler)
+
+            chart.append("rect")
+                    .attr("width", 500)
+                    .attr("height", 100)
+                    .attr("fill", "#eee")
+
+            chart.append("g")
+                    .attr("id", "axis-bottom")
+                    .attr("transform", "translate(0, 100)")
+                    .call(haxis)
+                 
+            chart.append("g")
+                    .attr("id", "axis-left")
+                    .attr("transform", "translate(0, 0)")
+                    .call(vaxis)
+
+            chart.selectAll("circle")
+                    .data(circleData)
+                    .enter()
+                    .append("circle")
+                    .attr("cx", circle => hscaler(circle.cx))
+                    .attr("cy", circle => vscaler(circle.cy))
+                    .attr("r", circle => circle.r)
+                    .style("fill", circle => circle.fill)
+
+
+        </script>
+
+    </body>
+
+</html>
